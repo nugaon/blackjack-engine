@@ -137,7 +137,6 @@ export interface State {
     activeHandId?: number; //only at STAGE_PLAYERS_TURN
   }
   deck: Card[];
-  availableControlActions: Array<ControlAction>
   rules: Rule;
   dealerCards: Card[];
   dealerHoleCard: Card | undefined | null;

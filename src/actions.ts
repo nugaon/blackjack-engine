@@ -1,4 +1,4 @@
-import { Action, Card } from '../types'
+import { Action, Card, SideBetsFromUser } from '../types'
 
 export const invalid = (action: Action, info: any): Action => {
   return {
@@ -17,12 +17,13 @@ export const restore = (): Action => {
   }
 }
 
-export const bet = ({ bet = 10, sideBets = { luckyLucky: 0 } }: { bet?: number, sideBets?: any }): Action => {
+export const bet = ({ bet = 10, playerId, sideBets = { luckyLucky: 0, perfectPairs: 0 } }: { bet: number, playerId: number, sideBets?: SideBetsFromUser }): Action => {
   return {
     type: 'BET',
     payload: {
       bet,
-      sideBets
+      sideBets,
+      playerId
     }
   }
 }
@@ -33,11 +34,12 @@ export const dealCards = (): Action => {
   }
 }
 
-export const insurance = ({ bet = 0 }: { bet: number }): Action => {
+export const insurance = ({ bet = 0, playerId }: { bet: number, playerId: number }): Action => {
   return {
     type: 'INSURANCE',
     payload: {
-      bet
+      bet,
+      playerId
     }
   }
 }

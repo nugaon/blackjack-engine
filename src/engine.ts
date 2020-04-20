@@ -281,17 +281,13 @@ export const checkActionAllowed = (action: Action, state: State): boolean => {
   //Check whitelisted actions
   const stageName = state.stage.name
 
-  if (action.type === 'BET' && (!action.payload || typeof action.payload.bet !== 'number')) {
-    throw new Error(`${action.type} without bet value on stage ${state.stage}`)
-  }
-
   switch (stageName) {
     case 'STAGE_READY': {
       if (!action.payload) {
         throw Error(`No action payload`)
       }
       const { bet, playerId } = action.payload
-      if (!bet || !playerId) {
+      if ( bet === undefined || playerId === undefined ) {
         throw Error(`Omitted 'bet' or 'playerId' params from the action payload`)
       }
       const activePlayer: Player = state.players[playerId];
@@ -301,13 +297,20 @@ export const checkActionAllowed = (action: Action, state: State): boolean => {
       return ['DEAL-CARDS'].indexOf(action.type) > -1
     }
     case 'STAGE_INSURANCE': {
+      if (!action.payload) {
+        throw Error(`No action payload`)
+      }
+      const { bet, playerId } = action.payload
+      if ( bet === undefined || playerId === undefined ) {
+        throw Error(`Omitted 'bet' or 'playerId' params from the action payload`)
+      }
       if(!state.rules['insurance']) {
         throw new Error(`Not allowed stage, because of the set rules`)
       }
       return ['INSURANCE'].indexOf(action.type) > -1
     }
     case 'STAGE_PLAYERS_TURN': {
-      if(!state.stage.activePlayerId || !state.stage.activeHandId) {
+      if(state.stage.activePlayerId === undefined || state.stage.activeHandId === undefined) {
         throw new Error(`'activePlayerId' and/or 'activeHandId' haven't been set in state`)
       }
       const activePlayerId = state.stage.activePlayerId

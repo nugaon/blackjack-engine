@@ -76,8 +76,8 @@ export default class Game {
 
   public getActivePlayer(): { activePlayerId: number, activeHandId: number } {
     const { activePlayerId, activeHandId } = this.state.stage
-    if(!activePlayerId || !activeHandId) {
-      throw Error('"playerId" or "handId" are omitted from the stage')
+    if(activePlayerId === undefined || activeHandId === undefined) {
+      throw Error('"playerId" or "handId" are omitted from the stage when getting Active Player')
     }
     return { activePlayerId, activeHandId }
   }
@@ -87,15 +87,14 @@ export default class Game {
 
       case 'BET': {
         // The players can take bets simultaneously, but only once
-        if(!action.payload) {
+        if(action.payload === undefined) {
           throw Error('Payload is omitted')
         }
         const { bet, playerId, sideBets } = action.payload
-        if(!bet || !playerId) {
+        if(bet === undefined || playerId === undefined) {
           throw Error('"bet" or "playerId" are omitted from the payload')
         }
-        const state = this.getState()
-        let players = state.players
+        let players = this.state.players
         const player: Player = players[playerId]
         player.initialBet = bet
         players[playerId] = player
@@ -105,20 +104,23 @@ export default class Game {
         }
         //calculate the next stage
         let stage: State['stage'] = { name: 'STAGE_READY' }
-        if(players.every(x => x.initialBet > 0)) {
+        if(players.every(x => x.initialBet > 0 || x.initialBet === Infinity)) { //infinity if player left from the course
           //next stage
           stage = { name: 'STAGE_DEAL_CARDS' }
         }
+        //set state
+        this.state.history.push(appendEpoch(action))
         this.state = {
-          ...state,
-          players,
-          stage
+          ...this.state,
+          stage,
+          players
         }
 
-        //after effects
+        //afterEffects
         if(stage.name === 'STAGE_DEAL_CARDS') {
           this._dispatch(actions.dealCards())
         }
+        break
       }
 
       case 'DEAL-CARDS': {
@@ -160,26 +162,26 @@ export default class Game {
         }
 
         // ask for insurance bets
-        if (stage) {
+        // when dealer has ace we set the stage to ISURANCE
+        if (dealerCards[0].value === 1) {
           stage = { name: 'STAGE_INSURANCE' }
         }
 
-        this.state.history.push(appendEpoch(action))
-
+        this.state.history.push(appendEpoch({ type: 'DEAL-CARDS' } ))
         this.state = {
           ...this.state,
           players,
           deck,
           stage,
-          dealerCards: dealerCards,
-          dealerHoleCard: dealerHoleCard,
-          dealerValue: dealerValue,
-          dealerHasBlackjack: dealerHasBlackjack,
+          dealerCards,
+          dealerHoleCard,
+          dealerValue,
+          dealerHasBlackjack,
           availableBets: getDefaultSideBets(false)
         }
 
-        //waiting for user action
         //afterEffects
+        //waiting for user action
         if(startPlayer === -1) {
           //all players have blackjack
           // purpose of the game archived !!!
@@ -192,17 +194,17 @@ export default class Game {
       case 'INSURANCE': {
         // It can call only once per player
         // it can be called simultaneously
-        // the prize only get at the end of the game
-        // until then it should be hidden
-        if(!action.payload) {
+        // the prize will be in the sideBetWins
+        // until the end of the game it should be hidden from the user
+        if(action.payload === undefined) {
           throw Error('Payload is omitted')
         }
         const { bet, playerId } = action.payload
-        if(!bet || !playerId) {
+        if(bet === undefined || playerId === undefined) {
           throw Error('"bet" or "playerId" are omitted from the payload')
         }
         const player: Player = this.state.players[playerId]
-        if(player.sideBetWins.insurance) {
+        if(player.sideBetWins.insurance !== undefined) {
           throw Error(`Player '${player.name}' already make insurance decision`)
         }
         if(bet > player.initialBet / 2) {
@@ -229,7 +231,7 @@ export default class Game {
         }
 
         //Alter state but not stage
-        const historyItem = appendEpoch(action)
+        const historyItem = appendEpoch(({ type: 'INSURANCE', payload: { playerId } }))
         // this.state.players[playerId] = player //already set because of the reference
         this.state.history = history.concat(historyItem)
         const stage = this._getStageFromInsuranceStage()
@@ -280,7 +282,7 @@ export default class Game {
 
         //init new state
         const stage = this._getStageFromPlayerTurn(activePlayerId)
-        const historyItem = appendEpoch(action)
+        const historyItem = appendEpoch(({ type: 'SPLIT', payload: { playerId: activePlayerId, handId: activeHandId}}))
         this.state.stage = stage
         this.state.history = history.concat(historyItem)
 
@@ -293,7 +295,7 @@ export default class Game {
 
       case 'HIT': {
         const { activePlayerId, activeHandId } = this.state.stage
-        if(!activePlayerId || !activeHandId) {
+        if(activePlayerId === undefined || activeHandId === undefined) {
           throw Error('"playerId" or "handId" are omitted from the stage')
         }
         const player = this.state.players[activePlayerId]
@@ -307,7 +309,7 @@ export default class Game {
 
         //init next stage
         const stage = this._getStageFromPlayerTurn(activePlayerId)
-        const historyItem = appendEpoch(action)
+        const historyItem = appendEpoch(({ type: 'HIT', payload: { playerId: activePlayerId, handId: activeHandId}}))
         this.state = ({
           ...this.state,
           stage,
@@ -333,16 +335,16 @@ export default class Game {
         player.hands[activeHandId] = hand
 
         //init next stage
-        const stage = this._getStageFromPlayerTurn(activePlayerId)
-        const historyItem = appendEpoch(action)
+        //not necessary to init stage because we use stand
+        const historyItem = appendEpoch(({ type: 'DOUBLE', payload: { playerId: activePlayerId, handId: activeHandId}}))
         this.state = ({
           ...this.state,
-          stage,
           //player already set because it was handled by reference
           history: history.concat(historyItem)
         })
 
         //afterEffects
+        //force stand
         this._dispatch(actions.stand())
         break
       }
@@ -355,7 +357,7 @@ export default class Game {
         player.hands[activeHandId] = hand
 
         const { history } = this.state
-        const historyItem = appendEpoch(action)
+        const historyItem = appendEpoch({ type: 'STAND', payload: { playerId: activePlayerId, handId: activeHandId}})
         this.state.history = history.concat(historyItem)
         const stage = this._getStageFromPlayerTurn(activePlayerId)
         this.state.stage = stage
@@ -366,9 +368,9 @@ export default class Game {
         break
       }
 
-      case TYPES.SHOWDOWN: {
+      case 'SHOWDOWN': {
         const { dealerHoleCard, history, players } = this.state
-        if(!dealerHoleCard) {
+        if(dealerHoleCard === null || dealerHoleCard === undefined) {
           throw new Error('Dealer hole card not set at showdown')
         }
 
@@ -399,6 +401,7 @@ export default class Game {
 
         this.state = {
           ...this.state,
+          stage: { name: 'STAGE_DONE' },
           players: engine.getPlayersWithPrizes(this.state.players, this.state.dealerCards)
         }
         break
@@ -415,7 +418,7 @@ export default class Game {
         hand = engine.getHandInfoAfterSurrender(hand)
         player.hands[0] = hand
         //because the player's is reference not necessary to set again to state
-        const historyItem = appendEpoch(action)
+        const historyItem = appendEpoch(({ type: 'STAND', payload: { playerId: activePlayerId } }))
         const stage = this._getStageFromPlayerTurn(activePlayerId)
         this.state = {
           ...this.state,
@@ -429,10 +432,12 @@ export default class Game {
         break
       }
 
-      case TYPES.DEALER_HIT: {
+      case 'DEALER-HIT': {
         const { rules, history } = this.state
         // the new card for dealer can be the "dealerHoleCard" or a new card
         // dealerHoleCard was set at the deal()
+        // called from SHOWDOWN action
+        // set STAGE_DONE when it finishes its actions
         const dealerHoleCard = action.payload && action.payload.dealerHoleCard ? action.payload.dealerHoleCard : null
         const card = dealerHoleCard || this._drawCard()
         const dealerCards = this.state.dealerCards.concat([card])
@@ -440,10 +445,14 @@ export default class Game {
         const dealerHasBlackjack = engine.isBlackjack(dealerCards)
         const dealerHasBusted = dealerValue.hi > 21
         let stage: State['stage'] = { name: "STAGE_DEALER_TURN" }
-        if (dealerValue.hi > 17) {
+        //calculate when it should be stopped
+        if (dealerValue.hi >= 17) {
           if (dealerHasBusted || dealerHasBlackjack || (rules.standOnSoft17 && engine.isSoftHand(dealerCards))) {
             stage = { name: "STAGE_DONE" }
           }
+        }
+        if(dealerValue.lo >= 17) {
+          stage = { name: "STAGE_DONE" }
         }
         const historyItem = appendEpoch(action)
         this.state = {
@@ -470,7 +479,7 @@ export default class Game {
 
   private _drawCard (): Card {
     const card = this.state.deck.pop()
-    if(!card) {
+    if(card === undefined || card === null) {
       throw Error(`No more cards in the deck`)
     }
     this.state.cardCount += engine.countCards([card])
@@ -509,7 +518,7 @@ export default class Game {
       }
       playerId++
     }
-    if (!gotNextPlayer) {
+    if (!gotNextPlayer || playerId === players.length) {
       return { name: 'STAGE_SHOWDOWN' }
     } else {
       return {

@@ -50,7 +50,6 @@ export const defaultState = (rules: Rule) : State => {
     dealerHasBusted: false,
     dealerCards: [],
     dealerValue: {hi: 0, lo: 0},
-    availableControlActions: ['NEW_ROUND'],
     cardCount: 0,
     history: []
   }

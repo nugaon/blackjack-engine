@@ -3,17 +3,15 @@
     "outDir": "./build/",
     "noImplicitAny": false,
     "target": "es6",
-    "jsx": "react",
-    "allowJs": true,
     "strict": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "moduleResolution": "node",
     "isolatedModules": true,
-    "noEmit": false,
     "strictPropertyInitialization": false,
     "removeComments": true,
     "declaration": true,
+    "forceConsistentCasingInFileNames": true,
   },
   "include": [
       "src/**/*"
