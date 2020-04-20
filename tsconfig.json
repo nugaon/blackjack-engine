@@ -1,21 +1,19 @@
 {
   "compilerOptions": {
+    "outDir": "./build/",
+    "noImplicitAny": false,
     "target": "es6",
-    "lib": [
-      "esnext"
-    ],
+    "jsx": "react",
     "allowJs": true,
-    "skipLibCheck": true,
+    "strict": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
-    "strict": true,
-    "forceConsistentCasingInFileNames": true,
     "moduleResolution": "node",
-    "resolveJsonModule": true,
     "isolatedModules": true,
-    "noEmit": true,
-    "noImplicitAny": false,
-    "strictPropertyInitialization": false
+    "noEmit": false,
+    "strictPropertyInitialization": false,
+    "removeComments": true,
+    "declaration": true,
   },
   "include": [
       "src/**/*"

@@ -26,10 +26,9 @@ export const getDefaultRules = (): Rule => {
   }
 }
 
-export const defaultPlayer = (name = "player-0", bank = 1000): Player => {
+export const defaultPlayer = (name = "player-0"): Player => {
   return {
     name,
-    bank, //in Euro ;)
     initialBet: 0,
     finalBet: 0,
     finalWin: 0,
