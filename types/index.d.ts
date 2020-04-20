@@ -164,21 +164,23 @@ export class Game {
   public enforceRules(handInfo: Hand): Hand;
   public getState(): State;
   public setState(state: Partial<State>): void;
+  public getActivePlayer(): { activePlayerId: number, activeHandId: number };
 }
 
 //-> move to Game
 export namespace actions {
-  function deal(bet: number, sideBets?: SideBetsInfo): Action;
+  function bet(bet: number, playerId: number, sideBets?: SideBetsInfo): Action;
+  // function dealCards
   // function dealerHit(options?: { dealerHoleCard: Card }): Action;
-  function hit(position?: number): Action;
-  function insurance(bet: number): Action;
+  function hit(): Action;
+  function insurance(bet: number, playerId: number): Action;
   // function invalid(action: Action, info: string): Action;
   function restore(): Action;
   // function showdown(options?: { dealerHoleCardOnly: boolean }): Action;
-  function split(position?: number): Action;
-  function stand(position?: number): Action;
+  function split(): Action;
+  function stand(): Action;
   function surrender(): Action;
-  function double(position?: number): Action;
+  function double(): Action;
 }
 
 export namespace engine {
@@ -239,4 +241,6 @@ export namespace engine {
 export namespace presets {
   function defaultState(rules: Rule): State;
   function getRules(): Rule;
+  function getDefaultRules(): Rule;
+  function defaultPlayer(): Player;
 }

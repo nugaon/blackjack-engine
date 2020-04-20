@@ -81,7 +81,7 @@ console.log(game.getState().stage)
 
 ## Project Structure
 
-Based on (Marco Casula's project)[https://github.com/kedoska/engine-blackjack/].
+Based on [Marco Casula's project](https://github.com/kedoska/engine-blackjack/).
 
 ### Actions
 
