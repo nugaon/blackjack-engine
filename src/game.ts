@@ -490,7 +490,7 @@ export default class Game {
   /// the state's 'players' array has to be modified according to the action before use this function!
   private _getStageFromInsuranceStage(): State['stage'] {
     const { players } = this.state
-    let hasPlayerUnderDecision = players.some(player => !!player.sideBetWins.insurance) //if insurance is not set, then decision hasn't made
+    let hasPlayerUnderDecision = players.some(player => player.sideBetWins.insurance === undefined) //if insurance is not set, then decision hasn't made
     if (hasPlayerUnderDecision) {
       return { name: 'STAGE_INSURANCE' }
     } else {
@@ -518,7 +518,7 @@ export default class Game {
       }
       playerId++
     }
-    if (!gotNextPlayer || playerId === players.length) {
+    if (!gotNextPlayer) {
       return { name: 'STAGE_SHOWDOWN' }
     } else {
       return {

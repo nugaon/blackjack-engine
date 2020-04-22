@@ -169,11 +169,11 @@ export class Game {
 
 //-> move to Game
 export namespace actions {
-  function bet(bet: number, playerId: number, sideBets?: SideBetsInfo): Action;
+  function bet({bet, playerId, sideBets}: {bet: number, playerId: number, sideBets?: SideBetsInfo}): Action;
   // function dealCards
   // function dealerHit(options?: { dealerHoleCard: Card }): Action;
   function hit(): Action;
-  function insurance(bet: number, playerId: number): Action;
+  function insurance({bet, playerId}: {bet: number, playerId: number}): Action;
   // function invalid(action: Action, info: string): Action;
   function restore(): Action;
   // function showdown(options?: { dealerHoleCardOnly: boolean }): Action;
@@ -240,7 +240,6 @@ export namespace engine {
 
 export namespace presets {
   function defaultState(rules: Rule): State;
-  function getRules(): Rule;
   function getDefaultRules(): Rule;
-  function defaultPlayer(): Player;
+  function defaultPlayer(name?: string): Player;
 }

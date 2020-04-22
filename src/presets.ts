@@ -1,7 +1,7 @@
 import { shuffle, newDecks } from '52-deck'
 import { SideBets, Rule, State, Player } from '../types'
 
-export const getDefaultSideBets = (active: boolean = false) : SideBets => {
+export const getDefaultSideBets = (active: boolean = true) : SideBets => {
   return {
     luckyLucky: active,
     perfectPairs: active,
