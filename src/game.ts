@@ -515,9 +515,10 @@ export default class Game {
           handId = handIndex
           gotNextPlayer = true
           break
-        } else {
-          playerId++
         }
+      }
+      if(!gotNextPlayer) {
+        playerId++
       }
     }
     if (!gotNextPlayer) {
