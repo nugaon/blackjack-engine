@@ -144,12 +144,12 @@ export const getHandInfoAfterDeal = (playerCards: Array<Card>, dealerCards: Arra
   }
 }
 
-export const getHandInfoAfterSplit = (playerCards: Array<Card>, dealerCards: Array<Card>, initialBet: number, canSplitAgain: boolean): Hand => {
+export const getHandInfoAfterSplit = (playerCards: Array<Card>, dealerCards: Array<Card>, initialBet: number): Hand => {
   const hand = getHandInfoInit(playerCards, dealerCards, true)
   const availableActions = hand.availableActions
   hand.availableActions = {
     ...availableActions,
-    split: canSplitAgain,
+    split: false,
     double: !hand.close && (playerCards.length === 2),
     insurance: false,
     surrender: false
