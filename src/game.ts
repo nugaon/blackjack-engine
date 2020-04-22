@@ -521,7 +521,7 @@ export default class Game {
         playerId++
       }
     }
-    if (!gotNextPlayer) {
+    if (!gotNextPlayer || playerId === players.length) {
       return { name: 'STAGE_SHOWDOWN' }
     } else {
       return {
