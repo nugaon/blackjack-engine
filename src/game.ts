@@ -208,7 +208,7 @@ export default class Game {
           throw Error(`Player '${player.name}' already make insurance decision`)
         }
         if(bet > player.initialBet / 2) {
-          throw Error('"bet" can\'t be higher than the player\'s initialBet')
+          throw Error('"bet" can\'t be higher than the half of the player\'s initial Bet')
         }
 
         const { dealerCards, dealerHoleCard, history } = this.state
