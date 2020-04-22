@@ -510,13 +510,15 @@ export default class Game {
     while (!gotNextPlayer && playerId < players.length) {
       const player = players[playerId]
       for(const [handIndex, hand] of player.hands.entries()) {
+        console.log(`hand at user ${player.name}`, hand)
         if(!hand.close) {
           handId = handIndex
           gotNextPlayer = true
           break
+        } else {
+          playerId++
         }
       }
-      playerId++
     }
     if (!gotNextPlayer) {
       return { name: 'STAGE_SHOWDOWN' }
